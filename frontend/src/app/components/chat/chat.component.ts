@@ -34,6 +34,12 @@ export class ChatComponent implements OnInit {
   constructor(private chatApi: ChatApiService, private router: Router) { }
 
   ngOnInit(): void {
+
+    this.chatApi.wakeUpServer().subscribe({
+      next: (response) => console.log('Servidor acordado:', response),
+      error: (err) => console.error('Erro ao acordar o servidor:', err)
+    });
+
     // Gera ou recupera um userId único para o usuário
     this.userId = localStorage.getItem('assisbot_userId') || uuidv4();
     localStorage.setItem('assisbot_userId', this.userId);
@@ -69,7 +75,7 @@ export class ChatComponent implements OnInit {
     this.messages.push({ role: 'user', text });
     this.messages.push({ role: 'loading', text: '' });
     this.shouldScrollDown = true;
-    
+
     this.chatApi.sendMessage(this.userId, text, this.chatTemperature).subscribe({
       next: (response) => {
         this.messages.pop(); // Remove o indicador de loading
@@ -95,10 +101,10 @@ export class ChatComponent implements OnInit {
       try {
         this.messagesArea.nativeElement.scrollTop = this.messagesArea.nativeElement.scrollHeight;
       } catch (err) {
-                console.error('Erro ao rolar a view:', err);
+        console.error('Erro ao rolar a view:', err);
       }
     }, 0);
   }
-  
+
 
 }
