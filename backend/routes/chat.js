@@ -150,6 +150,8 @@ router.post('/', async (req, res) => {
       });
       const dateInstruction = `INFORMAÇÃO TEMPORAL: A data de hoje é ${formattedDate}. Use esta data como referência para qualquer pergunta sobre prazos, eventos, "hoje", "amanhã", etc.`;
 
+      console.log(dateInstruction);
+
 
       const toneInstruction = getToneInstructions(piabot_temperature);
 
