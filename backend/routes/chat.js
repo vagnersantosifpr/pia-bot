@@ -148,7 +148,7 @@ router.post('/', async (req, res) => {
         month: 'long',
         day: 'numeric'
       });
-      const dateInstruction = `INFORMAÇÃO TEMPORAL: A data de hoje é ${formattedDate}. Use esta data como referência para qualquer pergunta sobre prazos, eventos, "hoje", "amanhã", etc.`;
+      const dateInstruction = `INFORMAÇÃO TEMPORAL: A data de hoje é ${formattedDate}. Use esta data como referência para qualquer pergunta sobre prazos, eventos, "hoje", "amanhã", etc. Quando o usuário perguntar sobre datas no calendário, realizar a análise e informar sobre os eventos após a data de hoje, quando as datas já tiverem passado, sempre informar que o prazo acabou ou se encerrou.`;
 
       console.log(dateInstruction);
 
