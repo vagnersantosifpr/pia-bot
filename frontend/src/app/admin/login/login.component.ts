@@ -22,6 +22,8 @@ export class LoginComponent {
   constructor(private authService: AuthService, private router: Router) { }
 
   onSubmit(): void {
+    console.log("Iniciado processo de autenticação com o backend.");
+
     this.authService.login(this.credentials).subscribe({
       next: () => {
         // Sucesso no login, navega para o dashboard

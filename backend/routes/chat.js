@@ -79,14 +79,14 @@ router.post('/', async (req, res) => {
 
     // --- ETAPA 1: BUSCAR HISTÓRICO E DEFINIR SE É UMA NOVA SESSÃO ---
     const conversation = await Conversation.findOne({ userId });
-    
+
     let isNewSession = true; // Assume que é uma nova sessão por padrão
     const SESSION_TIMEOUT_HOURS = 2; // Define que uma sessão "expira" após 8 horas
 
     if (conversation && conversation.messages.length > 0) {
       const lastMessage = conversation.messages[conversation.messages.length - 1];
       const hoursSinceLastMessage = (new Date() - new Date(lastMessage.timestamp)) / 1000 / 60 / 60;
-      
+
       if (hoursSinceLastMessage < SESSION_TIMEOUT_HOURS) {
         isNewSession = false; // A última mensagem é recente, continua a mesma sessão.
       }
@@ -96,6 +96,9 @@ router.post('/', async (req, res) => {
     console.log('Gerando embedding para a PERGUNTA do usuário...');
     const queryEmbeddingResult = await embeddingModel.embedContent(message);
     const queryVector = queryEmbeddingResult.embedding.values;
+
+
+
 
     // NOVO LOG: Verifique o vetor da consulta
     console.log('Vetor da consulta gerado (PERGUNTA). Tamanho:', queryVector.length);
@@ -116,7 +119,7 @@ router.post('/', async (req, res) => {
           }
         }
       ]);
-      console.log("Resultados de documentos relevantes: "+searchResults.length);
+      console.log("Resultados de documentos relevantes: " + searchResults.length);
     } catch (e) {
       console.error("Erro na busca vetorial:", e.message);
       // Se a busca vetorial falhar (ex: índice offline), searchResults continuará como []
@@ -128,7 +131,7 @@ router.post('/', async (req, res) => {
     let contextForThisTurn = searchResults.map(doc => `- ${doc.content}`).join('\n');
     console.log(`Contexto RAG para este turno: ${contextForThisTurn ? 'Encontrado' : 'Vazio'}`);
 
-// --- ETAPA 2: INICIAR OU CONTINUAR A SESSÃO DE CHAT ---
+    // --- ETAPA 2: INICIAR OU CONTINUAR A SESSÃO DE CHAT ---
     let chat;
     const history = conversation ? conversation.messages.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'model',
@@ -137,23 +140,34 @@ router.post('/', async (req, res) => {
 
     if (isNewSession) {
       console.log("Iniciando NOVA SESSÃO com systemInstruction atualizada.");
+
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('pt-BR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      const dateInstruction = `INFORMAÇÃO TEMPORAL: A data de hoje é ${formattedDate}. Use esta data como referência para qualquer pergunta sobre prazos, eventos, "hoje", "amanhã", etc.`;
+
+
       const toneInstruction = getToneInstructions(piabot_temperature);
 
 
       // A instrução do sistema é montada apenas uma vez por sessão
       const fullSystemInstruction = {
         role: "system",
-        parts: [{ text: `${systemPrompt}\n${toneInstruction}` }]
+        parts: [{ text: `${systemPrompt}\n\n${dateInstruction}\n\n${toneInstruction}` }]
       };
-      
+
       // LÓGICA DE FALLBACK - ACONTECE APENAS NA PRIMEIRA MENSAGEM
       //if (!contextForThisTurn) {
-        console.warn('RAG não encontrou contexto inicial. Carregando base de conhecimento completa como fallback.');
-        const allKnowledge = await Knowledge.find({}).select('content');
-        contextForThisTurn = allKnowledge.map(doc => `- ${doc.content}`).join('\n');
+      console.warn('RAG não encontrou contexto inicial. Carregando base de conhecimento completa como fallback.');
+      const allKnowledge = await Knowledge.find({}).select('content');
+      contextForThisTurn = allKnowledge.map(doc => `- ${doc.content}`).join('\n');
       //}
 
-      
+
       chat = generativeModel.startChat({
         systemInstruction: fullSystemInstruction,
         history: history, // Passamos o histórico completo para a IA ter o contexto de conversas passadas
@@ -162,17 +176,17 @@ router.post('/', async (req, res) => {
           maxOutputTokens: 800,
         }
       });
-      
+
     } else {
       console.log("Continuando sessão existente.");
-      chat = generativeModel.startChat({ 
+      chat = generativeModel.startChat({
         history: history, // A instrução de sistema já foi dada nesta sessão, basta o histórico
         // Aplica a temperatura dinâmica para esta sessão de chat
         generationConfig: {
           temperature: 0.2,
           maxOutputTokens: 800, // Mantenha ou ajuste conforme sua necessidade para a sessão
         }
-       });
+      });
     }
 
     // --- ETAPA 4: ENVIAR O PROMPT OTIMIZADO ---
@@ -183,16 +197,16 @@ router.post('/', async (req, res) => {
       ---
       PERGUNTA DO USUÁRIO: "${message}"
     `;
-    
+
     const result = await chat.sendMessage(promptForThisTurn);
     const response = await result.response;
     const botMessage = response.text();
 
-     // --- ETAPA 5: SALVAR E RESPONDER ---
+    // --- ETAPA 5: SALVAR E RESPONDER ---
     const updatedConversation = await Conversation.findOneAndUpdate(
-        { userId: userId },
-        { $push: { messages: [{ role: 'user', text: message }, { role: 'model', text: botMessage }] } },
-        { new: true, upsert: true }
+      { userId: userId },
+      { $push: { messages: [{ role: 'user', text: message }, { role: 'model', text: botMessage }] } },
+      { new: true, upsert: true }
     );
 
     // Envia a resposta do bot de volta para o frontend
