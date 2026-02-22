@@ -7,7 +7,7 @@ const Knowledge = require('../models/Knowledge'); // Importa o novo modelo
 
 // Inicializa o cliente do Google AI com a chave da API
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004", apiVersion: "v1" });
 const generativeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" }); // Usando o modelo mais recente e rápido
 
 
@@ -95,6 +95,9 @@ router.post('/', async (req, res) => {
     // --- ETAPA 2: BUSCAR CONTEXTO RELEVANTE PARA A MENSAGEM ATUAL (RAG) ---
     console.log('Gerando embedding para a PERGUNTA do usuário...');
 
+    let searchResults = [];
+    let contextForThisTurn;
+
     try {
       const queryEmbeddingResult = await embeddingModel.embedContent(message);
       const queryVector = queryEmbeddingResult.embedding.values;
@@ -104,7 +107,7 @@ router.post('/', async (req, res) => {
 
 
       console.log('Realizando busca vetorial no MongoDB...');
-      let searchResults = [];
+
       try {
         searchResults = await Knowledge.aggregate([
           {
@@ -123,19 +126,16 @@ router.post('/', async (req, res) => {
         // Se a busca vetorial falhar (ex: índice offline), searchResults continuará como []
       }
 
+      // --- NOVA LÓGICA DE FALLBACK AQUI ---
+      contextForThisTurn = searchResults.map(doc => `- ${doc.content}`).join('\n');
+      console.log(`Contexto RAG para este turno: ${contextForThisTurn ? 'Encontrado' : 'Vazio'}`);
+
     } catch (error) {
       console.error("Erro ao gerar embedding:", error);
       res.status(500).json({ error: 'Erro ao gerar embedding' });
     }
 
 
-
-
-
-
-    // --- NOVA LÓGICA DE FALLBACK AQUI ---
-    let contextForThisTurn = searchResults.map(doc => `- ${doc.content}`).join('\n');
-    console.log(`Contexto RAG para este turno: ${contextForThisTurn ? 'Encontrado' : 'Vazio'}`);
 
     // --- ETAPA 2: INICIAR OU CONTINUAR A SESSÃO DE CHAT ---
     let chat;
