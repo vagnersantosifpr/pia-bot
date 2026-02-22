@@ -133,6 +133,8 @@ router.post('/', async (req, res) => {
     } catch (error) {
       console.error("Erro ao gerar embedding:", error);
       //res.status(500).json({ error: 'Erro ao gerar embedding' });
+      const allKnowledge = await Knowledge.find({}).select('content');
+      contextForThisTurn = allKnowledge.map(doc => `- ${doc.content}`).join('\n');
     }
 
 
