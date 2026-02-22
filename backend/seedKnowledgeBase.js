@@ -28,15 +28,22 @@ async function generateEmbeddingsAndSeed() {
 
     for (const chunk of knowledgeChunks) {
       console.log(`Gerando embedding para o tópico: "${chunk.topic}"`);
-      const result = await model.embedContent(chunk.content);
-      const embedding = result.embedding.values;
 
-      await Knowledge.create({
-        source: chunk.source,
-        topic: chunk.topic,
-        content: chunk.content,
-        embedding: embedding,
-      });
+      try {
+        const result = await model.embedContent(chunk.content);
+        const embedding = result.embedding.values;
+
+        await Knowledge.create({
+          source: chunk.source,
+          topic: chunk.topic,
+          content: chunk.content,
+          embedding: embedding,
+        });
+      } catch (error) {
+            console.error("Erro ao gerar embedding:", error);
+      }
+      
+
       console.log(`- Chunk salvo no banco de dados.`);
     }
 

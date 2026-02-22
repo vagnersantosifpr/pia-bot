@@ -164,21 +164,27 @@ router.post('/knowledge', adminOnly, async (req, res) => {
 
     // Gera o embedding para o novo conteúdo
     console.log(`Gerando embedding para o novo tópico: "${topic}"`);
-    const result = await embeddingModel.embedContent(content);
-    const embedding = result.embedding.values;
 
-    // Cria o novo documento no banco de dados
-    const newKnowledgeItem = await Knowledge.create({
-      source,
-      topic,
-      content,
-      embedding,
-    });
+    try {
+      const result = await embeddingModel.embedContent(content);
+      const embedding = result.embedding.values;
 
-    // Retorna o item criado (sem o vetor gigante do embedding) para o frontend
-    const itemToReturn = newKnowledgeItem.toObject();
-    delete itemToReturn.embedding;
+      // Cria o novo documento no banco de dados
+      const newKnowledgeItem = await Knowledge.create({
+        source,
+        topic,
+        content,
+        embedding,
+      });
 
+      // Retorna o item criado (sem o vetor gigante do embedding) para o frontend
+      const itemToReturn = newKnowledgeItem.toObject();
+      delete itemToReturn.embedding;
+
+    } catch (error) {
+      console.error("Erro ao gerar embedding:", error);
+      res.status(500).json({ error: 'Erro ao gerar embedding' });
+    }
     res.status(201).json(itemToReturn);
 
   } catch (error) {
@@ -307,29 +313,35 @@ router.put('/knowledge/:id', adminOnly, async (req, res) => {
 
     // Regera o embedding para o conteúdo ATUALIZADO
     console.log(`Regerando embedding para o tópico atualizado: "${topic}"`);
-    const result = await embeddingModel.embedContent(content);
-    const newEmbedding = result.embedding.values;
 
-    // Encontra o item pelo ID e atualiza todos os campos, incluindo o novo embedding
-    const updatedItem = await Knowledge.findByIdAndUpdate(
-      id,
-      {
-        source,
-        topic,
-        content,
-        embedding: newEmbedding
-      },
-      { new: true } // Retorna o documento atualizado
-    );
+    try {
+      const result = await embeddingModel.embedContent(content);
+      const newEmbedding = result.embedding.values;
 
-    if (!updatedItem) {
-      return res.status(404).json({ error: 'Item de conhecimento não encontrado.' });
+      // Encontra o item pelo ID e atualiza todos os campos, incluindo o novo embedding
+      const updatedItem = await Knowledge.findByIdAndUpdate(
+        id,
+        {
+          source,
+          topic,
+          content,
+          embedding: newEmbedding
+        },
+        { new: true } // Retorna o documento atualizado
+      );
+
+      if (!updatedItem) {
+        return res.status(404).json({ error: 'Item de conhecimento não encontrado.' });
+      }
+
+      const itemToReturn = updatedItem.toObject();
+      delete itemToReturn.embedding;
+
+      res.json(itemToReturn);
+    } catch (error) {
+      console.error("Erro ao gerar embedding:", error);
+      res.status(500).json({ error: 'Erro ao gerar embedding' });
     }
-
-    const itemToReturn = updatedItem.toObject();
-    delete itemToReturn.embedding;
-
-    res.json(itemToReturn);
   } catch (error) {
     console.error('Erro ao atualizar item de conhecimento:', error);
     res.status(500).json({ error: 'Erro interno ao atualizar item.' });

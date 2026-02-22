@@ -94,36 +94,42 @@ router.post('/', async (req, res) => {
 
     // --- ETAPA 2: BUSCAR CONTEXTO RELEVANTE PARA A MENSAGEM ATUAL (RAG) ---
     console.log('Gerando embedding para a PERGUNTA do usuário...');
-    const queryEmbeddingResult = await embeddingModel.embedContent(message);
-    const queryVector = queryEmbeddingResult.embedding.values;
 
-
-
-
-    // NOVO LOG: Verifique o vetor da consulta
-    console.log('Vetor da consulta gerado (PERGUNTA). Tamanho:', queryVector.length);
-    console.log('Primeiros 5 valores do vetor (PERGUNTA):', queryVector.slice(0, 5));
-
-
-    console.log('Realizando busca vetorial no MongoDB...');
-    let searchResults = [];
     try {
-      searchResults = await Knowledge.aggregate([
-        {
-          $vectorSearch: {
-            index: "vector_index", // Garanta que o nome está correto
-            path: "embedding",
-            queryVector: queryVector,
-            numCandidates: 100,
-            limit: 4
+      const queryEmbeddingResult = await embeddingModel.embedContent(message);
+      const queryVector = queryEmbeddingResult.embedding.values;
+      // NOVO LOG: Verifique o vetor da consulta
+      console.log('Vetor da consulta gerado (PERGUNTA). Tamanho:', queryVector.length);
+      console.log('Primeiros 5 valores do vetor (PERGUNTA):', queryVector.slice(0, 5));
+
+
+      console.log('Realizando busca vetorial no MongoDB...');
+      let searchResults = [];
+      try {
+        searchResults = await Knowledge.aggregate([
+          {
+            $vectorSearch: {
+              index: "vector_index", // Garanta que o nome está correto
+              path: "embedding",
+              queryVector: queryVector,
+              numCandidates: 100,
+              limit: 4
+            }
           }
-        }
-      ]);
-      console.log("Resultados de documentos relevantes: " + searchResults.length);
-    } catch (e) {
-      console.error("Erro na busca vetorial:", e.message);
-      // Se a busca vetorial falhar (ex: índice offline), searchResults continuará como []
+        ]);
+        console.log("Resultados de documentos relevantes: " + searchResults.length);
+      } catch (e) {
+        console.error("Erro na busca vetorial:", e.message);
+        // Se a busca vetorial falhar (ex: índice offline), searchResults continuará como []
+      }
+      
+    } catch (error) {
+      console.error("Erro ao gerar embedding:", error);
+      res.status(500).json({ error: 'Erro ao gerar embedding' });
     }
+
+
+
 
 
 
