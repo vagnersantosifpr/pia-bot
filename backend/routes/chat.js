@@ -132,7 +132,7 @@ router.post('/', async (req, res) => {
 
     } catch (error) {
       console.error("Erro ao gerar embedding:", error);
-      res.status(500).json({ error: 'Erro ao gerar embedding' });
+      //res.status(500).json({ error: 'Erro ao gerar embedding' });
     }
 
 
