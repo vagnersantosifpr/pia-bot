@@ -8,11 +8,11 @@ const Knowledge = require('./models/Knowledge');
 
 // Configuração
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-const model = genAI.getGenerativeModel({
-  model: "gemini-embedding-001",
-  config: {
-    outputDimensionality: 768 // <-- Adicione este parâmetro!
-  }
+const embeddingModel = genAI.getGenerativeModel({
+  model: "gemini-embedding-001"//,
+  // config: {
+  //   outputDimensionality: 768 // <-- Adicione este parâmetro!
+  // }
 });
 const JSON_FILE_PATH = path.join(__dirname, '../knowledge_base_data.json');
 
@@ -35,8 +35,9 @@ async function generateEmbeddingsAndSeed() {
       console.log(`Gerando embedding para o tópico: "${chunk.topic}"`);
 
       try {
-        const result = await model.embedContent(chunk.content);
-        const embedding = result.embedding.values;
+        const result = await embeddingModel.embedContent(chunk.content);
+        //const embedding = result.embedding.values;
+        const embedding = result.embedding.values.slice(0, 768);
 
         await Knowledge.create({
           source: chunk.source,

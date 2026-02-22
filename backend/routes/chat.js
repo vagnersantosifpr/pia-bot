@@ -8,10 +8,10 @@ const Knowledge = require('../models/Knowledge'); // Importa o novo modelo
 // Inicializa o cliente do Google AI com a chave da API
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
 const embeddingModel = genAI.getGenerativeModel({
-  model: "gemini-embedding-001",
-  config: {
-    outputDimensionality: 768 // <-- Adicione este parâmetro!
-  }
+  model: "gemini-embedding-001"//,
+  // config: {
+  //   outputDimensionality: 768 // <-- Adicione este parâmetro!
+  // }
 });
 const generativeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" }); // Usando o modelo mais recente e rápido
 
@@ -105,7 +105,8 @@ router.post('/', async (req, res) => {
 
     try {
       const queryEmbeddingResult = await embeddingModel.embedContent(message);
-      const queryVector = queryEmbeddingResult.embedding.values;
+      //const queryVector = queryEmbeddingResult.embedding.values;
+      const queryVector = queryEmbeddingResult.embedding.values.slice(0, 768);
       // NOVO LOG: Verifique o vetor da consulta
       console.log('Vetor da consulta gerado (PERGUNTA). Tamanho:', queryVector.length);
       console.log('Primeiros 5 valores do vetor (PERGUNTA):', queryVector.slice(0, 5));

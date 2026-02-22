@@ -8,10 +8,10 @@ const User = require('../models/User');
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
 const embeddingModel = genAI.getGenerativeModel({
-  model: "gemini-embedding-001",
-  config: {
-    outputDimensionality: 768 // <-- Adicione este parâmetro!
-  }
+  model: "gemini-embedding-001"//,
+  // config: {
+  //   outputDimensionality: 768 // <-- Adicione este parâmetro!
+  // }
 });
 
 
@@ -172,7 +172,8 @@ router.post('/knowledge', adminOnly, async (req, res) => {
 
     try {
       const result = await embeddingModel.embedContent(content);
-      const embedding = result.embedding.values;
+      //const embedding = result.embedding.values;
+      const embedding = result.embedding.values.slice(0, 768);
 
       // Cria o novo documento no banco de dados
       const newKnowledgeItem = await Knowledge.create({
