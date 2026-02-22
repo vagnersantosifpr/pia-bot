@@ -7,7 +7,7 @@ const Knowledge = require('../models/Knowledge'); // Importa o novo modelo
 
 // Inicializa o cliente do Google AI com a chave da API
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
 const generativeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" }); // Usando o modelo mais recente e rápido
 
 
