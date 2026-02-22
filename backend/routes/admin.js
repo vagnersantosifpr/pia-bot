@@ -7,7 +7,12 @@ const Knowledge = require('../models/Knowledge');
 const User = require('../models/User');
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001"  });
+const embeddingModel = genAI.getGenerativeModel({
+  model: "gemini-embedding-001",
+  config: {
+    outputDimensionality: 768 // <-- Adicione este parâmetro!
+  }
+});
 
 
 // Novo Middleware de Autenticação baseado em Token JWT
