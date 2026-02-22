@@ -7,7 +7,7 @@ const Knowledge = require('../models/Knowledge'); // Importa o novo modelo
 
 // Inicializa o cliente do Google AI com a chave da API
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
+const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
 const generativeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" }); // Usando o modelo mais recente e rápido
 
 
@@ -122,7 +122,7 @@ router.post('/', async (req, res) => {
         console.error("Erro na busca vetorial:", e.message);
         // Se a busca vetorial falhar (ex: índice offline), searchResults continuará como []
       }
-      
+
     } catch (error) {
       console.error("Erro ao gerar embedding:", error);
       res.status(500).json({ error: 'Erro ao gerar embedding' });

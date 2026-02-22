@@ -8,7 +8,7 @@ const Knowledge = require('./models/Knowledge');
 
 // Configuração
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'embedding-001' });
+const model = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
 const JSON_FILE_PATH = path.join(__dirname, '../knowledge_base_data.json');
 
 async function generateEmbeddingsAndSeed() {
