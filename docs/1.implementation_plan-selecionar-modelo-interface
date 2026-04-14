@@ -1,0 +1,60 @@
+# Multi-Model Selection Implementation Plan
+
+The goal is to allow users to select different Gemini models in the chat interface. This provides a workaround when a specific model reaches its quota (429 Too Many Requests error).
+
+## User Review Required
+
+> [!IMPORTANT]
+> I will be adding a list of available Gemini models. Please confirm if you would like specific models included or excluded. I am starting with:
+> - `gemini-2.0-flash`
+> - `gemini-1.5-flash`
+> - `gemini-1.5-flash-8b`
+> - `gemini-1.5-pro`
+
+## Proposed Changes
+
+### Backend
+
+#### [MODIFY] [chat.js](file:///c:/Users/Vagner/Documents/pia-bot-main/backend/routes/chat.js)
+- Update the `/api/chat` POST route to accept a `model` field.
+- Remove the hardcoded global `generativeModel`.
+- Initialize the model dynamically within the route handler using `genAI.getGenerativeModel({ model: requestedModel || 'gemini-1.5-flash' })`.
+- Add basic validation to ensure the requested model is in a permitted list.
+
+---
+
+### Frontend
+
+#### [MODIFY] [chat-api.service.ts](file:///c:/Users/Vagner/Documents/pia-bot-main/frontend/src/app/services/chat-api.service.ts)
+- Update `sendMessage` to accept `model: string`.
+- Include the `model` in the request body sent to the backend.
+
+#### [MODIFY] [chat.component.ts](file:///c:/Users/Vagner/Documents/pia-bot-main/frontend/src/app/components/chat/chat.component.ts)
+- Define a list of available models with friendly names.
+- Store `selectedModel` and persist it in `localStorage`.
+- Update `handleSendMessage` to include the `selectedModel` in the API call.
+
+#### [MODIFY] [chat.component.html](file:///c:/Users/Vagner/Documents/pia-bot-main/frontend/src/app/components/chat/chat.component.html)
+- Add a refined model selector in the header or next to the temperature control.
+- Use a stylish `<select>` or a button group that matches the "Piá-bot" aesthetic.
+- Include visual indicators (like tooltips) to explain that switching models can help avoid quota limits.
+
+#### [MODIFY] [chat.component.scss](file:///c:/Users/Vagner/Documents/pia-bot-main/frontend/src/app/components/chat/chat.component.scss)
+- Style the new model selector to ensure it looks premium and integrated with the existing glassmorphism/modern design.
+
+---
+
+## Open Questions
+
+- **Models List**: Besides the ones listed above, are there any other models you have access to or prefer (e.g., specific experimental versions)?
+- **Automatic Fallback**: Would you like the system to automatically try a different model if the selected one returns a 429 error, or should it just be a manual user choice as requested?
+
+## Verification Plan
+
+### Automated Tests
+- I'll use the browser tool to verify the new UI element appears.
+- I will simulate a chat message and check (via backend logs) if the correct model parameter is being received.
+
+### Manual Verification
+- Verify that changing the model in the UI persists after a page refresh.
+- Verify that messages are still sent and received correctly across different models.

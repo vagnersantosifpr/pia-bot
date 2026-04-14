@@ -36,8 +36,8 @@ export class ChatApiService {
     return this.http.get(this.backendBaseUrl, { responseType: 'text' });
   }
 
-  sendMessage(userId: string, message: string, temperature: number): Observable<ChatResponse> {
-    const body = { userId, message, piabot_temperature: temperature };
+  sendMessage(userId: string, message: string, temperature: number, model?: string): Observable<ChatResponse> {
+    const body = { userId, message, piabot_temperature: temperature, model };
     return this.http.post<ChatResponse>(this.chatApiUrl, body);
   }
 

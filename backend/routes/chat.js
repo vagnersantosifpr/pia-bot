@@ -13,7 +13,17 @@ const embeddingModel = genAI.getGenerativeModel({
   //   outputDimensionality: 768 // <-- Adicione este parâmetro!
   // }
 });
-const generativeModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" }); // Usando o modelo mais recente e rápido
+
+// NOVA: Lista de modelos permitidos para seleção pelo usuário
+const ALLOWED_MODELS = [
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-pro'
+];
+
+// Modelo padrão caso nenhum seja especificado
+const DEFAULT_MODEL = 'gemini-1.5-flash';
 
 
 // ---- INÍCIO DA ENGENHARIA DE PROMPT ----
@@ -77,10 +87,15 @@ function getToneInstructions(piabot_temperature) {
 // Rota principal: POST /api/chat
 router.post('/', async (req, res) => {
   try {
-    const { userId, message, piabot_temperature } = req.body;
+    const { userId, message, piabot_temperature, model } = req.body;
     if (!userId || !message) {
       return res.status(400).json({ error: 'userId e message são obrigatórios.' });
     }
+
+    // NOVA: Validar e definir o modelo
+    const requestedModel = model && ALLOWED_MODELS.includes(model) ? model : DEFAULT_MODEL;
+    console.log(`Usando modelo: ${requestedModel}`);
+    const generativeModel = genAI.getGenerativeModel({ model: requestedModel });
 
     // --- ETAPA 1: BUSCAR HISTÓRICO E DEFINIR SE É UMA NOVA SESSÃO ---
     const conversation = await Conversation.findOne({ userId });

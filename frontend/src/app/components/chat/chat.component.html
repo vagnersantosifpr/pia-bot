@@ -15,7 +15,23 @@
     </div>
   </div>
 
-  <!-- NOVO CONTROLE DE TEMPERATURA -->
+  <!-- NOVO CONTROLE DE MODELO -->
+  <div class="model-selector">
+    <label for="model_select">Modelo de IA:</label>
+    <select id="model_select" [(ngModel)]="selectedModel" (ngModelChange)="onModelChange()" class="model-select">
+      <option *ngFor="let model of availableModels" [value]="model.id">
+        {{ model.label }}
+      </option>
+    </select>
+    <div class="model-info">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="info-icon">
+        <path fill-rule="evenodd" d="M2.25 12c0-6.15 5.07-11.25 11.25-11.25S24.75 5.85 24.75 12c0 6.15-5.07 11.25-11.25 11.25S2.25 18.15 2.25 12zm8.706-3.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 9a.75.75 0 000 1.5h.008a.75.75 0 000-1.5H9.75zm.375 5.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z" clip-rule="evenodd" />
+      </svg>
+      <span class="tooltip">Trocar de modelo pode ajudar<br/>a evitar limites de requisições</span>
+    </div>
+  </div>
+
+  <!-- CONTROLE DE TEMPERATURA -->
   <div class="temperature-control">
     <label for="piabot_temperature">Tom da Conversa:</label>
     <span class="temp-label">Descontraído</span>
