@@ -53,6 +53,16 @@ router.get('/conversations', async (req, res) => { // <-- VERIFIQUE ESTA FUNÇÃ
     const conversations = await Conversation.find({})
       .sort({ createdAt: -1 })
       .select('_id userId createdAt messages.0');
+    
+    // Anonimiza o userId para quem não é admin, evitando que capturem IDs para spoofing
+    if (req.user.role !== 'admin') {
+      const sanitized = conversations.map(c => ({
+        ...c.toObject(),
+        userId: `Estudante-${c.userId.substring(0, 4)}***`
+      }));
+      return res.json(sanitized);
+    }
+
     res.json(conversations);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar conversas.' });

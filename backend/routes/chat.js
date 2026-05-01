@@ -30,9 +30,9 @@ router.get('/models', async (req, res) => {
 // --- CONFIGURAÇÃO DE SEGURANÇA: RATE LIMIT ---
 const chatLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // Janela de 1 minuto
-  max: 5, // Limita cada usuário a 5 mensagens por minuto
+  max: 4, // Limita cada usuário a 5 mensagens por minuto
   // Importante: Identificamos pelo userId do body para não bloquear a escola inteira se o IP for o mesmo
-  keyGenerator: (req) => req.body?.userId || req.ip,
+  keyGenerator: (req) => `${req.ip}-${req.body?.userId || 'anonymous'}`, // Combina IP e userId para maior segurança
   message: { error: 'Calma lá, piá! Você está enviando mensagens muito rápido. Tente novamente em um minuto.' },
   validate: { keyGenerator: false }, // Desabilita o aviso de IPv6 pois usamos userId como chave principal
   standardHeaders: true,
