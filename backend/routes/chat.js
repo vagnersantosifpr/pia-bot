@@ -16,6 +16,16 @@ const embeddingModel = genAI.getGenerativeModel({
   // }
 });
 
+// MOVIDO PARA ANTES DO LIMITER: Listar modelos ativos para o componente de chat
+router.get('/models', async (req, res) => {
+  try {
+    const models = await AIModel.find({ isActive: true }).sort({ name: 1 });
+    res.json(models);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar modelos de IA.' });
+  }
+});
+
 // --- CONFIGURAÇÃO DE SEGURANÇA: RATE LIMIT ---
 const chatLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // Janela de 1 minuto
@@ -30,16 +40,6 @@ const chatLimiter = rateLimit({
 
 // Aplica o limitador à rota de chat
 router.use(chatLimiter);
-
-// NOVA ROTA: Listar modelos ativos para o componente de chat
-router.get('/models', async (req, res) => {
-  try {
-    const models = await AIModel.find({ isActive: true }).sort({ name: 1 });
-    res.json(models);
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao buscar modelos de IA.' });
-  }
-});
 
 /**
  * Higienização básica de entrada para evitar payloads gigantes ou caracteres de controle
