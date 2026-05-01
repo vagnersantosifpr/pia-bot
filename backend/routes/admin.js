@@ -5,6 +5,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Conversation = require('../models/Conversation');
 const Knowledge = require('../models/Knowledge');
 const User = require('../models/User');
+const AIModel = require('../models/AIModel');
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
 const embeddingModel = genAI.getGenerativeModel({
@@ -186,12 +187,13 @@ router.post('/knowledge', adminOnly, async (req, res) => {
       // Retorna o item criado (sem o vetor gigante do embedding) para o frontend
       const itemToReturn = newKnowledgeItem.toObject();
       delete itemToReturn.embedding;
-
+      res.status(201).json(itemToReturn);
     } catch (error) {
       console.error("Erro ao gerar embedding:", error);
       res.status(500).json({ error: 'Erro ao gerar embedding' });
     }
-    res.status(201).json(itemToReturn);
+    
+     res.status(201).json("Situação inesperada: o item de conhecimento foi criado, mas houve um erro ao gerar o embedding. Verifique os logs para mais detalhes.");
 
   } catch (error) {
     console.error('Erro ao adicionar item de conhecimento:', error);
@@ -353,5 +355,44 @@ router.put('/knowledge/:id', adminOnly, async (req, res) => {
     res.status(500).json({ error: 'Erro interno ao atualizar item.' });
   }
 });
+
+// --- NOVAS ROTAS PARA GERENCIAMENTO DE MODELOS DE IA ---
+router.get('/models', authMiddleware, async (req, res) => {
+  try {
+    const models = await AIModel.find({}).sort({ name: 1 });
+    res.json(models);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar modelos de IA.' });
+  }
+});
+
+router.post('/models', adminOnly, async (req, res) => {
+  try {
+    const newModel = await AIModel.create(req.body);
+    res.status(201).json(newModel);
+  } catch (error) {
+    res.status(400).json({ error: 'Erro ao criar modelo.', details: error.message });
+  }
+});
+
+router.put('/models/:id', adminOnly, async (req, res) => {
+  try {
+    const updatedModel = await AIModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedModel) return res.status(404).json({ error: 'Modelo não encontrado.' });
+    res.json(updatedModel);
+  } catch (error) {
+    res.status(400).json({ error: 'Erro ao atualizar modelo.' });
+  }
+});
+
+router.delete('/models/:id', adminOnly, async (req, res) => {
+  try {
+    await AIModel.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Modelo removido com sucesso.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao remover modelo.' });
+  }
+});
+
 
 module.exports = router;

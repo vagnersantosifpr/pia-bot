@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
-import { AdminApiService, ConversationSnippet, KnowledgeItem, User } from '../admin-api.service';
+import { AdminApiService, ConversationSnippet, KnowledgeItem, User, AIModel } from '../admin-api.service';
 import { AuthService } from '../auth.service';
 import { MessageFeedItem } from '../../services/chat-api.service';
 import { Subject } from 'rxjs';
@@ -16,7 +16,7 @@ import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  activeTab: 'history' | 'feed' | 'knowledge' | 'users' = 'history';
+  activeTab: 'history' | 'feed' | 'knowledge' | 'users' | 'models' = 'history';
 
   userName: string = '';
   userRole: 'admin' | 'viewer' = 'viewer'; // Para controlar permissões
@@ -29,6 +29,7 @@ export class DashboardComponent implements OnInit {
   users: User[] = []; // Nova propriedade para armazenar usuários
   messagesFeed: MessageFeedItem[] = []; // NOVA PROPRIEDADE
 
+  aiModels: AIModel[] = [];
 
   // Propriedades para o formulário de alteração de senha
   currentPassword = '';
@@ -75,6 +76,7 @@ export class DashboardComponent implements OnInit {
     this.loadInitialData();
     if (this.userRole === 'admin') { // Carrega usuários apenas se for admin
       this.loadUsers();
+      this.loadAIModels();
     }
 
     this.loadConversations();
@@ -207,6 +209,38 @@ export class DashboardComponent implements OnInit {
 
   }
 
+  loadAIModels(): void {
+    this.adminApi.getAIModels().subscribe({
+      next: data => this.aiModels = data,
+      error: err => console.error('Erro ao carregar modelos:', err)
+    });
+  }
+
+  toggleModelStatus(model: AIModel): void {
+    const newStatus = !model.isActive;
+    this.adminApi.updateAIModel(model._id, { isActive: newStatus }).subscribe({
+      next: (updated) => {
+        model.isActive = updated.isActive;
+      },
+      error: (err) => {
+        alert('Erro ao alterar status do modelo.');
+        console.error(err);
+      }
+    });
+  }
+
+  setDefaultModel(model: AIModel): void {
+    this.adminApi.updateAIModel(model._id, { isDefault: true }).subscribe({
+      next: () => {
+        this.loadAIModels(); // Recarrega para atualizar os badges de 'Padrão'
+      },
+      error: (err) => {
+        alert('Erro ao definir modelo padrão.');
+        console.error(err);
+      }
+    });
+  }
+
   loadUsers(): void {
     this.adminApi.getUsers().subscribe({
       next: data => this.users = data,
@@ -214,7 +248,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  setActiveTab(tab: 'history' | 'feed' | 'knowledge' | 'users'): void {
+  setActiveTab(tab: 'history' | 'feed' | 'knowledge' | 'users' | 'models'): void {
     this.activeTab = tab;
   }
 

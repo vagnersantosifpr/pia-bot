@@ -14,6 +14,14 @@ export type UserUpdatePayload = {
     newPassword?: string;
 };
 
+export interface AIModel {
+    _id: string;
+    name: string;
+    modelId: string;
+    isActive: boolean;
+    isDefault: boolean;
+    description?: string;
+}
 
 // NOVA INTERFACE PARA A MENSAGEM DO FEED
 export interface MessageFeedItem {
@@ -125,4 +133,18 @@ export class AdminApiService {
     // --- Métodos de Usuário (a serem implementados depois) ---
     // getUsers(): Observable<any[]> { ... }
     // createUser(user: any): Observable<any> { ... }
+
+    // --- Métodos de Modelos de IA ---
+    getAIModels(): Observable<AIModel[]> {
+        return this.http.get<AIModel[]>(`${this.apiUrl}/models`);
+    }
+
+    updateAIModel(id: string, data: Partial<AIModel>): Observable<AIModel> {
+        return this.http.put<AIModel>(`${this.apiUrl}/models/${id}`, data);
+    }
+
+    createAIModel(data: Partial<AIModel>): Observable<AIModel> {
+        return this.http.post<AIModel>(`${this.apiUrl}/models`, data);
+    }
+
 }
