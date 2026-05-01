@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AIModel } from '../admin/admin-api.service';
 
 // Define a interface para a resposta da API
 export interface ChatResponse {
@@ -46,5 +47,9 @@ export class ChatApiService {
     return this.http.get<MessageFeedItem[]>(`${this.chatApiUrl}/messages`);
   }
 
-}
+  // NOVO MÉTODO: Busca os modelos ativos do MongoDB para o seletor do chat
+  getAvailableModels(): Observable<AIModel[]> {
+    return this.http.get<AIModel[]>(`${this.chatApiUrl}/models`);
+  }
 
+}

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+// Adicione esta importação no topo do seu chat-api.service.ts
+
 
 // Crie um novo tipo para o payload de atualização
 // Este tipo inclui campos gerais que podem ser atualizados
@@ -138,6 +140,14 @@ export class AdminApiService {
     getAIModels(): Observable<AIModel[]> {
         return this.http.get<AIModel[]>(`${this.apiUrl}/models`);
     }
+
+    // Adicione este novo método para buscar os modelos disponíveis
+    getAvailableModels(): Observable<AIModel[]> {
+        // Ajuste a URL conforme seu ambiente (localhost ou produção)
+        // Certifique-se de que esta URL aponte para a rota /api/chat/models que criamos no backend
+        return this.http.get<AIModel[]>(`${this.apiUrl}/models`);
+    }
+
 
     updateAIModel(id: string, data: Partial<AIModel>): Observable<AIModel> {
         return this.http.put<AIModel>(`${this.apiUrl}/models/${id}`, data);

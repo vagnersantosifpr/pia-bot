@@ -58,10 +58,30 @@ export class ChatComponent implements OnInit {
     const savedModel = localStorage.getItem('piabot_selectedModel');
     this.selectedModel = savedModel || 'gemini-flash-latest';
 
+    // Chama o carregamento dos modelos dinâmicos
+    this.loadModels();
+
     // Mensagem inicial de boas-vindas
     this.messages.push({
       role: 'model',
       text: 'Daí! Eu sou o ELO, mas pode me chamar de Piá-bot. Sou seu canal de apoio aqui no IFPR. No que posso te ajudar?'
+    });
+  }
+
+  loadModels(): void {
+    this.chatApi.getAvailableModels().subscribe({
+      next: (models) => {
+        this.availableModels = models;
+
+        // Se o modelo salvo não estiver mais na lista (foi desativado), reseta para o padrão
+        const stillAvailable = models.some(m => m.modelId === this.selectedModel);
+        if (!stillAvailable && models.length > 0) {
+          const defaultModel = models.find(m => m.isDefault) || models[0];
+          this.selectedModel = defaultModel.modelId;
+          this.onModelChange();
+        }
+      },
+      error: (err) => console.error('Erro ao carregar modelos do MongoDB:', err)
     });
   }
 
