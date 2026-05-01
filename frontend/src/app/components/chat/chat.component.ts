@@ -10,6 +10,7 @@ import { ChatApiService } from '../../services/chat-api.service';
 import { Message } from '../../message.model';
 import { v4 as uuidv4 } from 'uuid'; // Precisaremos de uma lib de UUID
 import { Router } from '@angular/router';
+import { AIModel } from '../../admin/admin-api.service';
 
 
 @Component({
@@ -29,23 +30,8 @@ export class ChatComponent implements OnInit {
 
   chatTemperature: number = 1.0; // Valor padrão neutro
 
-  // NOVA: Definição de modelos disponíveis
-  availableModels = [
-    { id: 'gemini-3-flash-preview', label: 'Gemini 3 Flash Preview' },
-    { id: 'gemini-3.1-pro-preview' , label: 'Gemini 3.1 Pro Preview (Mais Preciso)' },
-    { id: 'gemini-3.1-flash-lite-preview' , label: 'Gemini 3.1 Flash Lite Preview (Mais Rápido)' },
-    { id: 'gemini-2.5-pro' , label: 'Gemini 2.5 Pro (Mais Preciso)' },
-    { id: 'gemini-flash-latest', label: 'Gemini Flash Latest (Mais Rápido)' },
-    { id: 'gemini-flash-lite-latest', label: 'Gemini Flash Lite Latest (Leve)' },
-    { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (Rápido)' },
-    { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite (Leve)' },
-    { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (Mais Rápido)' },
-    { id: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
-    { id: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B (Leve)' },
-    { id: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro (Mais Preciso)' }
-  ];
-
-  
+  // Agora os modelos vêm dinamicamente do MongoDB
+  availableModels: AIModel[] = [];
 
   selectedModel: string = 'gemini-flash-latest'; // Modelo padrão
 
