@@ -253,7 +253,7 @@ router.post('/', async (req, res) => {
         history: history, // Passamos o histórico completo para a IA ter o contexto de conversas passadas
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 800,
+          maxOutputTokens: 2048,
         }
       });
 
@@ -264,7 +264,7 @@ router.post('/', async (req, res) => {
         // Aplica a temperatura dinâmica para esta sessão de chat
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 800, // Mantenha ou ajuste conforme sua necessidade para a sessão
+          maxOutputTokens: 2048,
         }
       });
     }
