@@ -120,7 +120,9 @@ export class ChatComponent implements OnInit {
       },
       error: (err) => {
         this.messages.pop(); // Remove o indicador de loading
-        this.messages.push({ role: 'model', text: 'Piá, deu um erro aqui. Tenta de novo mais tarde, beleza?' });
+        // Captura a mensagem amigável do backend ou define um fallback local
+        const friendlyError = err.error?.error || 'Tive um probleminha para te responder agora. Pode tentar de novo?';
+        this.messages.push({ role: 'model', text: friendlyError });
         this.shouldScrollDown = true;
         console.error(err);
       }

@@ -279,6 +279,14 @@ PERGUNTA DO ESTUDANTE: "${message}"`;
 
     const result = await chat.sendMessage(promptForThisTurn);
     const response = await result.response;
+
+    // Verifica se a resposta foi bloqueada por motivos de segurança da IA
+    if (response.promptFeedback && response.promptFeedback.blockReason) {
+      return res.status(400).json({ 
+        error: 'Puxa, piá... não posso falar sobre esse assunto. Vamos focar no que envolve o nosso campus?' 
+      });
+    }
+
     const botMessage = response.text();
 
     // --- ETAPA 5: SALVAR E RESPONDER ---
@@ -292,8 +300,24 @@ PERGUNTA DO ESTUDANTE: "${message}"`;
     res.json({ reply: botMessage });
 
   } catch (error) {
-    console.error('Erro no endpoint do chat:', error);
-    res.status(500).json({ error: 'Ocorreu um erro ao processar sua mensagem.' });
+    console.error('Erro detalhado no endpoint do chat:', error);
+
+    // Erro de Cota Excedida (Rate Limit do Google)
+    if (error.status === 429 || (error.message && error.message.includes('429'))) {
+      return res.status(429).json({ 
+        error: 'Eita! Muita gente falando comigo agora e estouramos a cota de hoje. Espera uns minutinhos e tenta de novo?' 
+      });
+    }
+
+    // Erro de Modelo não encontrado ou desativado
+    if (error.status === 404 || (error.message && error.message.includes('not found'))) {
+      return res.status(404).json({ 
+        error: 'Ih, esse modelo de IA parece que sumiu ou está em manutenção. Tenta trocar o modelo ali em cima para a gente continuar!' 
+      });
+    }
+
+    // Erro genérico
+    res.status(500).json({ error: 'Deu um revertério aqui no meu sistema! Tenta mandar a mensagem de novo daqui a pouco?' });
   }
 });
 
