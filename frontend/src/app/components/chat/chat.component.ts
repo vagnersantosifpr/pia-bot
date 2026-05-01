@@ -71,6 +71,7 @@ export class ChatComponent implements OnInit {
   loadModels(): void {
     this.chatApi.getAvailableModels().subscribe({
       next: (models) => {
+        console.log('Modelos recebidos do MongoDB:', models);
         this.availableModels = models;
 
         // Se o modelo salvo não estiver mais na lista (foi desativado), reseta para o padrão

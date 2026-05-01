@@ -20,6 +20,7 @@ const embeddingModel = genAI.getGenerativeModel({
 router.get('/models', async (req, res) => {
   try {
     const models = await AIModel.find({ isActive: true }).sort({ name: 1 });
+    console.log(`[GET /models] Enviando ${models.length} modelos ativos para o frontend.`);
     res.json(models);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar modelos de IA.' });
