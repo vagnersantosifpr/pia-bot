@@ -16,6 +16,14 @@ const embeddingModel = genAI.getGenerativeModel({
 
 // NOVA: Lista de modelos permitidos para seleção pelo usuário
 const ALLOWED_MODELS = [
+  'gemini-3-flash-preview',
+  'gemini-3.1-pro-preview',
+  'gemini-3.1-flash-lite-preview',
+  'gemini-2.5-pro',
+  'gemini-flash-latest',
+  'gemini-flash-lite-latest',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
   'gemini-2.0-flash',
   'gemini-1.5-flash',
   'gemini-1.5-flash-8b',
@@ -23,7 +31,7 @@ const ALLOWED_MODELS = [
 ];
 
 // Modelo padrão caso nenhum seja especificado
-const DEFAULT_MODEL = 'gemini-1.5-flash';
+const DEFAULT_MODEL = 'gemini-flash-latest';
 
 
 // ---- INÍCIO DA ENGENHARIA DE PROMPT ----
@@ -251,9 +259,3 @@ router.post('/', async (req, res) => {
 
 
 module.exports = router;
-
-
-
-
-
-
