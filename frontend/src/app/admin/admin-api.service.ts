@@ -147,4 +147,8 @@ export class AdminApiService {
         return this.http.post<AIModel>(`${this.apiUrl}/models`, data);
     }
 
+    deleteAIModel(id: string): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/models/${id}`);
+    }
+
 }

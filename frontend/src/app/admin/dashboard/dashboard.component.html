@@ -14,6 +14,7 @@
             <button (click)="setActiveTab('feed')" [class.active]="activeTab === 'feed'">Feed de Mensagens</button>
             <button (click)="setActiveTab('knowledge')" [class.active]="activeTab === 'knowledge'">Base de
                 Conhecimento</button>
+            <button (click)="setActiveTab('models')" [class.active]="activeTab === 'models'">Modelos de IA</button>
             <button (click)="setActiveTab('users')" [class.active]="activeTab === 'users'">Gerenciar Usuários</button>
         </nav>
 
@@ -270,6 +271,71 @@
                 <div *ngIf="userRole !== 'admin'" class="no-privileges">
                     <p>Você não tem privilégios de administrador para gerenciar outros usuários.</p>
                 </div>
+            </div>
+        </div>
+
+        <!-- Aba de Modelos de IA -->
+        <div *ngIf="activeTab === 'models'" class="tab-content">
+            <div class="tab-header">
+                <h3>Gerenciamento de Modelos Generativos</h3>
+                <p>Adicione novos modelos do Gemini ou desative os que não são mais suportados.</p>
+            </div>
+
+            <!-- Formulário para Inserir Novo Modelo -->
+            <div class="admin-card add-model-form">
+                <h4>Cadastrar Novo Modelo</h4>
+                <div class="form-grid">
+                    <input [(ngModel)]="newAIModel.name" placeholder="Nome amigável (ex: Gemini 2.0 Flash)" name="newModelName">
+                    <input [(ngModel)]="newAIModel.modelId" placeholder="ID Técnico (ex: gemini-2.0-flash)" name="newModelId">
+                    <input [(ngModel)]="newAIModel.description" placeholder="Descrição curta" name="newModelDescription">
+                    <button (click)="onAddModelSubmit()" [disabled]="isModelSubmitting" class="btn-save">
+                        {{ isModelSubmitting ? 'Salvando...' : 'Adicionar Modelo' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabela de Listagem e Consulta -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Modelo</th>
+                            <th>ID Técnico</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let model of aiModels">
+                            <td>
+                                <strong>{{ model.name }}</strong><br>
+                                <small>{{ model.description }}</small>
+                                <span *ngIf="model.isDefault" class="badge-default" style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">PADRÃO</span>
+                            </td>
+                            <td><code>{{ model.modelId }}</code></td>
+                            <td>
+                                <span [class]="model.isActive ? 'badge-active' : 'badge-inactive'">
+                                    {{ model.isActive ? 'Ativo' : 'Inativo' }}
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <button (click)="toggleModelStatus(model)" 
+                                        class="btn-action"
+                                        [style.background-color]="model.isActive ? '#ffc107' : '#28a745'">
+                                    {{ model.isActive ? 'Desativar' : 'Ativar' }}
+                                </button>
+                                
+                                <button *ngIf="!model.isDefault && model.isActive" 
+                                        (click)="setDefaultModel(model)" 
+                                        class="btn-action btn-set-default"
+                                        style="background-color: #007bff; margin-left: 5px;">
+                                    Tornar Padrão
+                                </button>
+                                <button (click)="deleteAIModel(model._id)" class="btn-action btn-delete" style="background-color: #dc3545; margin-left: 5px;">Excluir</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>

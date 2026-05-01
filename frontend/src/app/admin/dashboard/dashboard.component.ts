@@ -31,6 +31,10 @@ export class DashboardComponent implements OnInit {
 
   aiModels: AIModel[] = [];
 
+  // Propriedades para criação de novos modelos
+  newAIModel = { name: '', modelId: '', description: '', isActive: true, isDefault: false };
+  isModelSubmitting = false;
+
   // Propriedades para o formulário de alteração de senha
   currentPassword = '';
   newPassword = '';
@@ -227,6 +231,34 @@ export class DashboardComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  onAddModelSubmit(): void {
+    if (!this.newAIModel.name || !this.newAIModel.modelId) {
+      alert('Nome e ID Técnico são obrigatórios.');
+      return;
+    }
+    this.isModelSubmitting = true;
+    this.adminApi.createAIModel(this.newAIModel).subscribe({
+      next: (model) => {
+        this.aiModels.push(model);
+        this.newAIModel = { name: '', modelId: '', description: '', isActive: true, isDefault: false };
+        this.isModelSubmitting = false;
+      },
+      error: (err) => {
+        alert('Erro ao criar modelo.');
+        this.isModelSubmitting = false;
+      }
+    });
+  }
+
+  deleteAIModel(id: string): void {
+    if (confirm('Deseja realmente remover este modelo?')) {
+      this.adminApi.deleteAIModel(id).subscribe({
+        next: () => this.aiModels = this.aiModels.filter(m => m._id !== id),
+        error: (err) => alert('Erro ao remover modelo.')
+      });
+    }
   }
 
   setDefaultModel(model: AIModel): void {
