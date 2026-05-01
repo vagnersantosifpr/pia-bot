@@ -23,6 +23,7 @@ const chatLimiter = rateLimit({
   // Importante: Identificamos pelo userId do body para não bloquear a escola inteira se o IP for o mesmo
   keyGenerator: (req) => req.body.userId || req.ip,
   message: { error: 'Calma lá, piá! Você está enviando mensagens muito rápido. Tente novamente em um minuto.' },
+  validate: { keyGenerator: false }, // Desabilita o aviso de IPv6 pois usamos userId como chave principal
   standardHeaders: true,
   legacyHeaders: false,
 });

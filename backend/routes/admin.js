@@ -192,8 +192,6 @@ router.post('/knowledge', adminOnly, async (req, res) => {
       console.error("Erro ao gerar embedding:", error);
       res.status(500).json({ error: 'Erro ao gerar embedding' });
     }
-    
-     res.status(201).json("Situação inesperada: o item de conhecimento foi criado, mas houve um erro ao gerar o embedding. Verifique os logs para mais detalhes.");
 
   } catch (error) {
     console.error('Erro ao adicionar item de conhecimento:', error);

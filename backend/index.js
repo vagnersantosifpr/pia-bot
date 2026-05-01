@@ -10,6 +10,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
+
+// Confia no proxy para obter o IP real do cliente (essencial para rate-limiting em PaaS como Render/Heroku)
+app.set('trust proxy', 1);
+
 app.use(express.json());
 
 // ---- ADICIONE ESTAS LINHAS ----
